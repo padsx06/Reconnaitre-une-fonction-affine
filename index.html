@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nature d'une fonction — 3e</title>
+<style>
+  :root{
+    --bg:#f4f7fb; --card:#ffffff; --ink:#172033; --muted:#637083;
+    --primary:#4f46e5; --primary2:#eef2ff; --ok:#15803d; --okbg:#ecfdf3;
+    --bad:#b42318; --badbg:#fff1f0; --line:#dce3ee; --shadow:0 12px 35px rgba(30,41,59,.10);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:linear-gradient(180deg,#eef2ff 0,#f8fafc 320px,#f4f7fb 100%);color:var(--ink)}
+  .wrap{max-width:980px;margin:0 auto;padding:28px 18px 50px}
+  header{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:20px}
+  h1{font-size:clamp(1.6rem,3vw,2.35rem);margin:0 0 7px;letter-spacing:-.035em}
+  .subtitle{margin:0;color:var(--muted);font-size:1rem;line-height:1.45}
+  .badge{white-space:nowrap;background:#111827;color:white;border-radius:999px;padding:8px 12px;font-weight:750;font-size:.84rem}
+  .panel{background:var(--card);border:1px solid rgba(148,163,184,.25);border-radius:22px;box-shadow:var(--shadow);overflow:hidden}
+  .toolbar{padding:17px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:14px;align-items:center;flex-wrap:wrap}
+  .levels{display:flex;gap:8px;flex-wrap:wrap}
+  button{font:inherit}
+  .level{border:1px solid var(--line);background:#fff;color:#344054;border-radius:12px;padding:9px 12px;font-weight:750;cursor:pointer}
+  .level.active{background:var(--primary);border-color:var(--primary);color:#fff}
+  .stats{display:flex;gap:14px;color:#475467;font-weight:750;font-size:.92rem}
+  .exercise{padding:28px 24px 24px}
+  .question{font-weight:800;color:#344054;margin-bottom:14px}
+  .formula{display:flex;align-items:center;justify-content:center;min-height:106px;background:#f8fafc;border:1px solid var(--line);border-radius:18px;font-family:"Cambria Math",Cambria,Georgia,serif;font-size:clamp(1.65rem,4vw,2.35rem);letter-spacing:.01em;margin-bottom:22px;padding:18px;text-align:center}
+  .section-title{font-size:.93rem;color:#475467;font-weight:800;margin:0 0 10px}
+  .choices{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+  .choice{border:2px solid var(--line);background:#fff;border-radius:14px;padding:13px 10px;font-weight:800;cursor:pointer;transition:.15s ease;color:#344054}
+  .choice:hover{border-color:#a5b4fc;background:#fafaff}
+  .choice.selected{border-color:var(--primary);background:var(--primary2);color:#3730a3}
+  .coeffs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:5px 0 18px}
+  .coeff{background:#f8fafc;border:1px solid var(--line);border-radius:15px;padding:14px}
+  .coeff label{display:block;font-weight:800;color:#475467;margin-bottom:8px}
+  input{width:100%;border:2px solid #d0d5dd;border-radius:11px;padding:11px 12px;font-size:1.08rem;background:#fff;color:#111827;outline:none}
+  input:focus{border-color:#818cf8;box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+  .hint{color:var(--muted);font-size:.88rem;margin:-7px 0 18px;line-height:1.4}
+  .actions{display:flex;gap:10px;flex-wrap:wrap}
+  .btn{border:0;border-radius:12px;padding:11px 16px;font-weight:800;cursor:pointer}
+  .primary{background:var(--primary);color:#fff}
+  .secondary{background:#eef2f6;color:#344054}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .feedback{margin-top:20px;border-radius:16px;padding:16px 17px;line-height:1.55;display:none;border:1px solid transparent}
+  .feedback.ok{display:block;background:var(--okbg);border-color:#a6f4c5;color:#14532d}
+  .feedback.bad{display:block;background:var(--badbg);border-color:#fecdca;color:#7a271a}
+  .feedback strong{display:block;margin-bottom:4px;font-size:1.02rem}
+  .method{margin-top:11px;padding-top:11px;border-top:1px dashed rgba(71,84,103,.25);color:#344054}
+  .progress-wrap{padding:0 24px 25px}
+  .progress-label{display:flex;justify-content:space-between;color:#667085;font-size:.85rem;margin-bottom:7px}
+  .progress{height:9px;background:#e9edf3;border-radius:999px;overflow:hidden}
+  .progress > div{height:100%;width:0;background:linear-gradient(90deg,#6366f1,#8b5cf6);transition:width .25s ease}
+  .recap{display:none;padding:28px 24px;text-align:center}
+  .recap.show{display:block}
+  .recap h2{margin:0 0 8px;font-size:1.8rem}
+  .bigscore{font-size:3.2rem;font-weight:900;color:var(--primary);margin:10px 0}
+  .rules{margin-top:18px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:17px 19px;color:#475467;line-height:1.55}
+  .rules b{color:#1f2937}
+  .small{font-size:.88rem;color:#667085}
+  @media(max-width:700px){
+    header{display:block}.badge{display:inline-block;margin-top:12px}.choices{grid-template-columns:1fr 1fr}.coeffs{grid-template-columns:1fr}.exercise{padding:22px 16px}.progress-wrap{padding:0 16px 22px}.toolbar{padding:14px 16px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Reconnaître la nature d’une fonction</h1>
+      <p class="subtitle">Niveau 3e — Identifier la nature de la fonction puis, lorsque c’est possible, retrouver les coefficients <b>a</b> et <b>b</b>.</p>
+    </div>
+    <div class="badge">Maths • 3e</div>
+  </header>
+
+  <div class="panel" id="gamePanel">
+    <div class="toolbar">
+      <div class="levels" aria-label="Choix du niveau">
+        <button class="level active" data-level="1">Niveau 1</button>
+        <button class="level" data-level="2">Niveau 2</button>
+        <button class="level" data-level="3">Niveau 3</button>
+        <button class="level" data-level="mix">Mélange</button>
+      </div>
+      <div class="stats"><span id="scoreTxt">Score : 0</span><span id="streakTxt">Série : 0</span></div>
+    </div>
+
+    <div class="exercise" id="exerciseArea">
+      <div class="question">Donner la nature de la fonction :</div>
+      <div class="formula" id="formula">f(x) = 3x + 5</div>
+
+      <div class="section-title">1. Nature de la fonction</div>
+      <div class="choices" id="choices">
+        <button class="choice" data-kind="affine">Affine</button>
+        <button class="choice" data-kind="linear">Linéaire</button>
+        <button class="choice" data-kind="constant">Constante</button>
+        <button class="choice" data-kind="none">Aucune des 3</button>
+      </div>
+
+      <div id="coeffBlock">
+        <div class="section-title">2. Identifier les coefficients de la forme f(x) = ax + b</div>
+        <div class="coeffs">
+          <div class="coeff"><label for="aInput">Coefficient a</label><input id="aInput" inputmode="decimal" autocomplete="off" placeholder="a = …"></div>
+          <div class="coeff"><label for="bInput">Coefficient b</label><input id="bInput" inputmode="decimal" autocomplete="off" placeholder="b = …"></div>
+        </div>
+        <div class="hint">Pour une fonction linéaire, <b>b = 0</b>. Pour une fonction constante, <b>a = 0</b>.</div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" id="checkBtn">Vérifier</button>
+        <button class="btn secondary" id="nextBtn" disabled>Exercice suivant</button>
+        <button class="btn secondary" id="newBtn">Nouvelle série</button>
+      </div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+
+    <div class="recap" id="recap">
+      <h2>Série terminée</h2>
+      <div class="bigscore" id="finalScore">0/10</div>
+      <p id="finalMsg">Bravo !</p>
+      <button class="btn primary" id="restartBtn">Recommencer une série</button>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-label"><span id="countTxt">Exercice 1 sur 10</span><span>10 exercices</span></div>
+      <div class="progress"><div id="progressBar"></div></div>
+    </div>
+  </div>
+
+  <div class="rules">
+    <b>Convention utilisée dans cette activité :</b> les quatre réponses sont exclusives. On choisit <b>linéaire</b> pour f(x)=ax avec a≠0, <b>constante</b> pour f(x)=b, <b>affine</b> pour f(x)=ax+b avec a≠0 et b≠0, et <b>aucune des 3</b> lorsqu’on ne peut pas écrire la fonction sous la forme ax+b.
+    <div class="small" style="margin-top:8px">Les fonctions linéaires et constantes sont mathématiquement des cas particuliers de fonctions affines ; ici on les distingue pour entraîner la reconnaissance de leur nature usuelle au collège.</div>
+  </div>
+</div>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const $$ = s => [...document.querySelectorAll(s)];
+  const rint = (min,max) => Math.floor(Math.random()*(max-min+1))+min;
+  const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+  const nz = (min=-9,max=9) => { let n=0; while(n===0) n=rint(min,max); return n; };
+
+  let level = '1', current = null, selectedKind = null;
+  let index = 1, score = 0, streak = 0, locked = false;
+  let seen = new Set();
+
+  const kindLabel = {affine:'affine', linear:'linéaire', constant:'constante', none:'aucune des 3'};
+
+  function signedTerm(n, variable=false, first=false){
+    if(variable){
+      const abs=Math.abs(n); const core=(abs===1?'':abs)+'x';
+      if(first) return n<0?'−'+core:core;
+      return n<0?' − '+core:' + '+core;
+    }
+    if(first) return n<0?'−'+Math.abs(n):String(n);
+    return n<0?' − '+Math.abs(n):' + '+n;
+  }
+
+  function axb(a,b){
+    let s='';
+    if(a!==0) s=signedTerm(a,true,true);
+    if(b!==0) s += signedTerm(b,false,s==='');
+    if(s==='') s='0';
+    return s;
+  }
+
+  function directExercise(difficulty){
+    const kind = pick(['affine','linear','constant','none']);
+    let a=null,b=null,expr='',explanation='';
+    if(kind==='affine'){
+      a=nz(-9,9); b=nz(-9,9);
+      if(difficulty===1 || Math.random()<.55){
+        expr=axb(a,b);
+      } else {
+        expr = Math.random()<.5 ? `${b}${a<0?' − ':' + '}${Math.abs(a)===1?'':Math.abs(a)}x` : axb(a,b);
+        if(a===-1 && expr.includes('1x')) expr=expr.replace('1x','x');
+      }
+      explanation=`On peut écrire la fonction sous la forme f(x) = ${axb(a,b)}. Ici a = ${a} et b = ${b}, tous deux non nuls.`;
+    }
+    if(kind==='linear'){
+      a=nz(-9,9); b=0;
+      expr = difficulty>=2 && Math.random()<.25 ? `${axb(a,0)} + 0` : axb(a,0);
+      explanation=`On reconnaît la forme f(x) = ax avec a = ${a}. Dans la forme ax + b, on a donc b = 0.`;
+    }
+    if(kind==='constant'){
+      a=0; b=rint(-9,9);
+      expr = difficulty>=2 && Math.random()<.35 ? `0x${b<0?' − ':' + '}${Math.abs(b)}` : String(b).replace('-', '−');
+      explanation=`La valeur de f(x) ne dépend pas de x. Dans la forme ax + b, on a a = 0 et b = ${b}.`;
+    }
+    if(kind==='none'){
+      const c=nz(-6,6), d=rint(-7,7);
+      const forms=[
+        {e:`${c===1?'':c===-1?'−':c}x²${d===0?'':signedTerm(d,false,false)}`,why:'Le terme en x² empêche une écriture sous la forme ax + b.'},
+        {e:`${c}/x${d===0?'':signedTerm(d,false,false)}`,why:'x apparaît au dénominateur : ce n’est pas une expression de la forme ax + b.'},
+        {e:`${c===1?'':c===-1?'−':c}x²${signedTerm(nz(-5,5),true,false)}${d===0?'':signedTerm(d,false,false)}`,why:'La présence de x² empêche une écriture sous la forme ax + b.'}
+      ];
+      const f=pick(forms); expr=f.e; explanation=f.why;
+    }
+    return {kind,a,b,expr,explanation};
+  }
+
+  function reducedExercise(){
+    const kind=pick(['affine','linear','constant','none']);
+    let a=null,b=null,expr='',explanation='';
+    if(kind==='affine'){
+      const p=nz(-5,5), q=nz(-6,6), r=nz(-5,5);
+      a=p+r; b=p*q;
+      if(a===0 || b===0) return reducedExercise();
+      expr=`${p===1?'':p===-1?'−':p}(x${q<0?' − ':' + '}${Math.abs(q)})${signedTerm(r,true,false)}`;
+      explanation=`En réduisant : ${p}(x ${q<0?'−':'+'} ${Math.abs(q)}) ${r<0?'−':'+'} ${Math.abs(r)}x = ${axb(a,b)}. Donc a = ${a} et b = ${b}.`;
+    }
+    if(kind==='linear'){
+      const p=nz(-5,5), q=nz(-5,5); a=p+q; b=0;
+      if(a===0) return reducedExercise();
+      expr=`${axb(p,0)}${signedTerm(q,true,false)}`;
+      explanation=`En réduisant les termes en x, on obtient f(x) = ${axb(a,0)}. C’est une fonction linéaire : a = ${a} et b = 0.`;
+    }
+    if(kind==='constant'){
+      const p=nz(-5,5), c=rint(-9,9); a=0; b=c;
+      expr=`${axb(p,0)}${signedTerm(-p,true,false)}${signedTerm(c,false,false)}`;
+      explanation=`Les termes en x s’annulent : ${p}x ${-p<0?'−':'+'} ${Math.abs(p)}x = 0. Il reste f(x) = ${c}. Donc a = 0 et b = ${c}.`;
+    }
+    if(kind==='none'){
+      const p=nz(-4,4), q=nz(-5,5), r=nz(-4,4);
+      expr=`${p===1?'':p===-1?'−':p}x²${signedTerm(q,true,false)}${signedTerm(r,false,false)}`;
+      explanation=`Même après réduction, il reste un terme en x². La fonction ne peut donc pas s’écrire sous la forme ax + b.`;
+    }
+    return {kind,a,b,expr,explanation};
+  }
+
+  function makeExercise(){
+    let ex, key, tries=0;
+    do{
+      const effective = level==='mix' ? pick([1,2,3]) : Number(level);
+      ex = effective===3 ? reducedExercise() : directExercise(effective);
+      key = `${ex.kind}|${ex.expr}`;
+      tries++;
+    }while(seen.has(key) && tries<80);
+    seen.add(key);
+    return ex;
+  }
+
+  function normalizeNumber(v){
+    if(v==null) return NaN;
+    const s=String(v).trim().replace(',', '.').replace(/−/g,'-');
+    if(/^[-+]?\d+(\.\d+)?$/.test(s)) return Number(s);
+    const frac=s.match(/^([-+]?\d+)\s*\/\s*([-+]?\d+)$/);
+    if(frac && Number(frac[2])!==0) return Number(frac[1])/Number(frac[2]);
+    return NaN;
+  }
+
+  function setCoeffVisibility(){
+    const show = selectedKind !== 'none';
+    $('#coeffBlock').style.display = show ? 'block' : 'none';
+  }
+
+  function render(){
+    current=makeExercise(); selectedKind=null; locked=false;
+    $('#formula').textContent=`f(x) = ${current.expr}`;
+    $$('.choice').forEach(b=>b.classList.remove('selected'));
+    $('#aInput').value=''; $('#bInput').value='';
+    $('#feedback').className='feedback'; $('#feedback').innerHTML='';
+    $('#checkBtn').disabled=false; $('#nextBtn').disabled=true;
+    $('#coeffBlock').style.display='block';
+    $('#countTxt').textContent=`Exercice ${index} sur 10`;
+    $('#progressBar').style.width=`${(index-1)*10}%`;
+    $('#scoreTxt').textContent=`Score : ${score}`;
+    $('#streakTxt').textContent=`Série : ${streak}`;
+  }
+
+  function selectKind(kind){
+    if(locked) return;
+    selectedKind=kind;
+    $$('.choice').forEach(b=>b.classList.toggle('selected',b.dataset.kind===kind));
+    setCoeffVisibility();
+  }
+
+  function check(){
+    if(locked) return;
+    if(!selectedKind){
+      const f=$('#feedback'); f.className='feedback bad'; f.innerHTML='<strong>Choisis d’abord la nature de la fonction.</strong>';
+      return;
+    }
+    const kindOK=selectedKind===current.kind;
+    let coeffOK=true;
+    if(current.kind!=='none'){
+      const av=normalizeNumber($('#aInput').value), bv=normalizeNumber($('#bInput').value);
+      coeffOK=(av===current.a && bv===current.b);
+    }
+    const allOK=kindOK && coeffOK;
+    locked=true;
+    if(allOK){score++;streak++;}else{streak=0;}
+    $('#scoreTxt').textContent=`Score : ${score}`;
+    $('#streakTxt').textContent=`Série : ${streak}`;
+    $('#checkBtn').disabled=true; $('#nextBtn').disabled=false;
+
+    const f=$('#feedback');
+    f.className='feedback '+(allOK?'ok':'bad');
+    let detail='';
+    if(current.kind==='none'){
+      detail=`La bonne réponse est <b>« Aucune des 3 »</b>.`;
+    } else {
+      detail=`La bonne réponse est <b>${kindLabel[current.kind]}</b>, avec <b>a = ${current.a}</b> et <b>b = ${current.b}</b>.`;
+    }
+    f.innerHTML=`<strong>${allOK?'Correct !':'À revoir.'}</strong>${detail}<div class="method"><b>Pourquoi ?</b> ${current.explanation}</div>`;
+  }
+
+  function next(){
+    if(index>=10){
+      $('#exerciseArea').style.display='none'; $('#recap').classList.add('show');
+      $('#progressBar').style.width='100%'; $('#countTxt').textContent='Série terminée';
+      $('#finalScore').textContent=`${score}/10`;
+      $('#finalMsg').textContent = score===10?'Parfait : toutes les natures et tous les coefficients sont maîtrisés.':score>=8?'Très bien. Revois seulement les quelques cas qui t’ont piégé.':score>=5?'Tu progresses. Observe toujours la forme ax + b avant de répondre.':'Reprends les quatre formes de référence puis recommence une série.';
+      return;
+    }
+    index++; render();
+  }
+
+  function restart(){
+    index=1;score=0;streak=0;seen=new Set();
+    $('#exerciseArea').style.display='block'; $('#recap').classList.remove('show');
+    render();
+  }
+
+  $$('.choice').forEach(b=>b.addEventListener('click',()=>selectKind(b.dataset.kind)));
+  $$('.level').forEach(b=>b.addEventListener('click',()=>{
+    level=b.dataset.level; $$('.level').forEach(x=>x.classList.toggle('active',x===b)); restart();
+  }));
+  $('#checkBtn').addEventListener('click',check);
+  $('#nextBtn').addEventListener('click',next);
+  $('#newBtn').addEventListener('click',restart);
+  $('#restartBtn').addEventListener('click',restart);
+  ['aInput','bInput'].forEach(id=>$('#'+id).addEventListener('keydown',e=>{if(e.key==='Enter')check();}));
+
+  render();
+})();
+</script>
+</body>
+</html>
